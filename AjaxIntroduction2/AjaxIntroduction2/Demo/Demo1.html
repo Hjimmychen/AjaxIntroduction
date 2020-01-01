@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <meta charset="utf-8" />
+</head>
+<body>
+    <script src="../Scripts/jquery-3.4.1.js"></script>
+    <table>
+        <tr>
+            <td>
+                <span>輸入姓名：</span>
+            </td>
+            <td>
+                <input id="name" type="text" />
+            </td>
+            <td>
+                <button id="checkButton" type="button">檢查</button>
+            </td>
+            <td>
+                <span id="message">
+                    <!--(錯誤訊息)!-->
+                </span>
+            </td>
+        </tr>
+    </table>
+    <script>
+        $("#checkButton").click(function () {
+            var name = $("#name").val();
+            var check = isNameDuplicate(name);
+
+            if (!check) {
+                $("#message").text("名稱可使用!").css("color", "green");
+            }
+            else {
+                $("#message").text("名稱已被使用!").css("color", "red");
+            }
+        });
+
+        function isNameDuplicate(name) {
+            var result = false;
+
+            $.ajax({
+                url: "/AjaxService.asmx/IsNameDuplicate",
+                method: "POST",
+                dataType: "json",
+                data: { "name": name },
+                async: false,
+                success: function (data) {
+                    result = data;
+                    console.log(result);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(textStatus);
+                }
+            });
+
+            return result;
+        }
+    </script>
+</body>
+</html>

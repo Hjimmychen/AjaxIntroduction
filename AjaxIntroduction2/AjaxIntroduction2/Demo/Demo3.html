@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+	<meta charset="utf-8" />
+</head>
+<body>
+    <script src="../Scripts/jquery-3.4.1.js"></script>
+
+    <table style="margin-left:15px;text-align: center;">
+        <tr>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+            <td>10</td>
+            <td>11</td>
+            <td>12</td>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" data-month="1"/>
+            </td>
+            <td>
+                <input type="text" data-month="2"/>
+            </td>
+            <td>
+                <input type="text" data-month="3"/>
+            </td>
+            <td>
+                <input type="text" data-month="4"/>
+            </td>
+            <td>
+                <input type="text" data-month="5"/>
+            </td>
+            <td>
+                <input type="text" data-month="6"/>
+            </td>
+            <td>
+                <input type="text" data-month="7"/>
+            </td>
+            <td>
+                <input type="text" data-month="8"/>
+            </td>
+            <td>
+                <input type="text" data-month="9"/>
+            </td>
+            <td>
+                <input type="text" data-month="10"/>
+            </td>
+            <td>
+                <input type="text" data-month="11"/>
+            </td>
+            <td>
+                <input type="text" data-month="12"/>
+            </td>
+        </tr>
+    </table>
+    <p id="msg" style="color: red;margin-left:15px;">(訊息顯示)</p>
+</body>
+</html>
+<script>
+    $("[data-month]").change(function () {
+        var targetMonth = $(this).attr("data-month");  //輸入的月份
+        var input = getInputtedValue();  //已輸入的值
+
+        $.ajax({
+            url: "/AjaxService.asmx/ValidMonthInput",
+            method: "post",
+            dataType: "json",
+            data: { "month": targetMonth, "inputted": getInputtedValue },
+            success: function (data) {
+                if (data.success) {
+                    $("#msg").text("輸入成功!").css("color", "green");
+                }
+                else {
+                    $("#msg").text("輸入失敗! 請勿值大於" + data.msg).css("color", "red");
+                    $("[data-month='" + targetMonth + "']").val("");
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(textStatus);
+            }
+        });
+    });
+
+    function getInputtedValue() {
+        var data = "";
+        var userInput = $("[data-month]");
+
+        for (var i = 0; i < userInput.length; i++) {
+            data += $(userInput[i]).val() + ",";
+        }
+
+        data = data.substring(0, data.length - 1);
+
+        return data;
+    }
+</script>
+<style>
+    table{
+        border: 1px solid;
+        border-collapse: collapse;
+    }
+
+    table td{
+        border: 1px solid;
+        padding: 5px 10px;
+    }
+
+    table td input{
+        width: 50px;
+    }
+</style>

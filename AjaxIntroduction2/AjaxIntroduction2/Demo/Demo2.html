@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+	<meta charset="utf-8" />
+</head>
+<body>
+    <script src="../Scripts/jquery-3.4.1.js"></script>
+    <script src="../bootstrap-4.3.1-dist/js/bootstrap.js"></script>
+    <link href="../bootstrap-4.3.1-dist/css/bootstrap.css" rel="stylesheet" />
+    <div style="width: 400px;margin-left: 15px;">
+        <button type="button" id="getUserButton">取得清單</button>
+        <br/><br />
+        <table id="userTable" class="table">
+            <thead>
+                <tr>
+                    <th style="width: 1px;"></th>
+                    <th>姓名</th>
+                    <th>電話</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3" style="text-align:center;">Empty!</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">編輯人員</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table" style="margin-bottom: 0;">
+                        <tr>
+                            <td>編號</td>
+                            <td>
+                                <span id="userIdLabel">1</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>名稱</td>
+                            <td>
+                                <input id="userNameEdit" type="text" value=""/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>電話</td>
+                            <td>
+                                <input id="userMobileEdit" type="text" value=""/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">關閉</button>
+                    <button type="button" id="userUpdateButton" class="btn btn-primary btn-sm">更新</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $("#getUserButton").click(function () {
+            displayUserList();
+        });
+
+        $(document).on('click', '[data-edit]', function () {
+            $("#editModal").modal('show');
+
+            var id = $(this).data("edit");
+            var user = getUserByID(id);  //ajax function
+
+            $("#userIdLabel").text(user.ID);
+            $("#userNameEdit").val(user.Name);
+            $("#userMobileEdit").val(user.Mobile);
+        });
+
+        $(document).on('click', '[data-del]', function () {
+            var id = $(this).data("del");
+
+            delUserByID(id);  //ajax
+            displayUserList();
+        });
+
+        $("#userUpdateButton").click(function () {
+            var id = $("#userIdLabel").text();
+            var name = $("#userNameEdit").val();
+            var mobile = $("#userMobileEdit").val();
+
+            $.ajax({
+                url: "/AjaxService.asmx/UpdateUser",
+                method: "POST",
+                dataType: "json",
+                data: { "id": id, "name": name, "mobile": mobile },
+                async: false,
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(textStatus);
+                }
+            });
+
+            $("#editModal").modal('hide');
+            displayUserList();
+        });
+
+        //利用資料更新DOM
+        function displayUserList() {
+            var users = getUser();
+            var htmlStr = "";
+            $("#userTable > tbody").empty();
+
+            $.each(users, function (index, item) {
+                htmlStr += "<tr>";
+                htmlStr += "<td style='white-space: nowrap;'>";
+                htmlStr += "<button type='button' data-edit='" + item.ID + "'>編輯</button>";
+                htmlStr += "<button type='button' data-del='" + item.ID + "'>刪除</button>";
+                htmlStr += "</td>";
+                htmlStr += "<td>" + item.Name + "</td>";
+                htmlStr += "<td>" + item.Mobile + "</td>";
+                htmlStr += "</tr>";
+            });
+
+            $("#userTable > tbody").append(htmlStr);
+        }
+
+        //取得人員清單
+        function getUser() {
+            var result = new Array();
+
+            $.ajax({
+                url: "/AjaxService.asmx/GetUser",
+                method: "POST",
+                dataType: "json",
+                //data: {},
+                async: false,
+                success: function (data) {
+                    result = data;
+                    console.log(result);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(textStatus);
+                }
+            });
+
+            return result;
+        }
+
+        //取得人員
+        function getUserByID(id) {
+            var result = new Array();
+
+            $.ajax({
+                url: "/AjaxService.asmx/GetUserByID",
+                method: "POST",
+                dataType: "json",
+                data: {"id" : id},
+                async: false,
+                success: function (data) {
+                    result = data;
+                    console.log(result);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(textStatus);
+                }
+            });
+
+            return result;
+        }
+
+        //刪除
+        function delUserByID(id) {
+            var result = new Array();
+
+            $.ajax({
+                url: "/AjaxService.asmx/DelUserByID",
+                method: "POST",
+                dataType: "json",
+                data: { "id": id },
+                async: false,
+                success: function (data) {
+                    result = data;
+                    console.log(result);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(textStatus);
+                }
+            });
+
+            return result;
+        }
+    </script>
+</body>
+</html>
